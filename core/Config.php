@@ -1,6 +1,6 @@
 <?php
 
-if(!defined('INSIDE_ACCESS')){
+if (!defined('INSIDE_ACCESS')) {
     die('No access to script!');
 }
 
@@ -52,13 +52,53 @@ abstract class Config implements IDataContains {
  */
 class ArrayConfig extends Config {
 
+    protected $configFields = array();
+
+    /**
+     * Create array config with extend of parent config
+     * 
+     * @param string $configPath
+     * @param AppConfig $parentConfig
+     */
+    public function __construct($configPath, ArrayConfig $parentConfig = null) {
+        parent::__construct($configPath);
+        if (!is_null($parentConfig)) {
+            $this->merge($parentConfig);
+        }
+    }
+
+    /**
+     * Load config from array file
+     */
     public function load() {
         if (file_exists($this->configPath)) {
             $params = include($this->configPath);
             foreach ($params as $key => $value) {
                 $this->$key = $value;
+                $this->configFields[$key] = $value;
             }
         }
+    }
+
+    /**
+     * Merge current config witn new
+     * @param ArrayConfig $config
+     */
+    public function merge(ArrayConfig $config) {
+        $fieldsArray = $config->getFieldsList();
+        foreach ($fieldsArray as $key) {
+            $this->$key = $config->$key;
+            $this->configFields[$key] = $config->$key;
+        }
+    }
+
+    /**
+     * Return list of all existing fields in current config
+     * 
+     * @return array
+     */
+    public function getFieldsList() {
+        return array_keys($this->configFields);
     }
 
 }
@@ -67,7 +107,7 @@ class ArrayConfig extends Config {
  * Class for array configs
  */
 class IniConfig extends Zend_Config_Ini {
-    
+
     protected $params;
 
 }

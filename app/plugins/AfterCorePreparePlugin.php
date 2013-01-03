@@ -22,6 +22,10 @@ require_once ROOT_PATH . DS . 'core' . DS . 'View.php';
  */
 class AfterCorePreparePlugin extends Plugin {
     
+    /**
+     * Not checked urls
+     * @var array 
+     */
     protected $notCheckUrls = array(
         'auth/sign',
         'auth/login',
@@ -32,18 +36,35 @@ class AfterCorePreparePlugin extends Plugin {
      * Check access of user 
      */
     public function executeUserAuth(){
+        // Get current user obkect
         $user = Factory::getCurrentUser();
-        if(strcasecmp($user->getLogin(), Factory::getConfig()->admin_login) != 0){
-            if(!in_array(Core::getCurrentUrl(), $this->notCheckUrls)){
-                $user->setReturnUrl(Core::getCurrentUrl());
+        // If is guest check access rights
+        if($user->isGuest()){
+            // Guest have access only on some pages
+            if(!in_array(Router::getCurrentUrl(), $this->notCheckUrls)){
+                // Save redirect url for back after
+                Session::setValue('redirect_url', Router::getCurrentUrl());
+                // Save post for transmit after login
+                Session::setValue('post', $_POST);
+                // Run login action in current page
                 require_once ROOT_PATH . DS . 'core' . DS . 'Controller.php';
+                // Create error message
                 Session::inTempStorage('loginDataErrors', array(Controller::createMessage('ERROR_NO_ACCESS')));
+                // Execute action
                 Core::instance()->execute('Auth')->actionLogin();
                 exit;
             }
         }
+        if($user->isAdmin()){
+            if(Session::isExist('post')){
+                $_POST = Session::removeValue('post');
+            }
+        }
     }
     
+    /**
+     * Include global includes of scripts that using everywhere
+     */
     public static function executeGlobalInclude(){
         require_once APP_PATH . DS . 'classes' . DS . 'RegexLib.php';
     } 

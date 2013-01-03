@@ -16,12 +16,13 @@ if(!defined('INSIDE_ACCESS')){
 require_once ROOT_PATH . DS . 'core' . DS . 'Form.php';
 
 /**
- * Class for 
+ * Class for login form
  */
 class LoginForm extends Form {
 
     protected $login;
     protected $password;
+    protected $remember = false;
 
     public function getLogin() {
         return $this->login;
@@ -38,16 +39,28 @@ class LoginForm extends Form {
     public function setPassword($password) {
         $this->password = $password;
     }
+    
+    public function getRemember() {
+        return $this->remember;
+    }
 
+    public function setRemember($remember) {
+        $this->remember = $remember;
+    }
+    
     public function load($post) {
         $this->login = $post['login'];
         $this->password = $post['password'];
+        if(isset($post['remember'])){
+            $this->remember = (bool)$post['remember'];
+        }
     }
 
     public function getData() {
         return array(
             'login' => $this->login,
-            'password' => $this->password
+            'password' => $this->password,
+            'remember' => $this->remember
         );
     }
 
@@ -57,6 +70,9 @@ class LoginForm extends Form {
 
     public function isValid() {
         $isValid = true;
+        if(!$this->isTokenValid()){
+            return false;
+        }
         if ($this->login == '') {
             $this->addError(Label::_('ERROR_FIELD_REQUIRED'), 'error', 'login');
             $isValid = false;

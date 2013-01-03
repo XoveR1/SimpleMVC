@@ -21,14 +21,29 @@ class Registry {
 
     protected static $storageArray = array();
 
+    /**
+     * Set data in the registry
+     * @param string $key
+     * @param mixed $value
+     */
     public static function setData($key, $value) {
         self::$storageArray[$key] = $value;
     }
 
+    /**
+     * Get data from registry by key
+     * @param string $key
+     * @return mixed
+     */
     public static function getData($key) {
         return self::$storageArray[$key];
     }
     
+    /**
+     * Checks exist of registry value by key
+     * @param string $key
+     * @return bool
+     */
     public static function isExist($key) {
         return isset(self::$storageArray[$key]);
     }    

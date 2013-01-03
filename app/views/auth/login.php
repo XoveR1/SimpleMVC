@@ -31,9 +31,9 @@
             </label>
         </div>
         <div class="modal-footer">
-            <input type="hidden" name="loginData[returnUrl]" value="<?= Factory::getCurrentUser()->getReturnUrl() ?>" />
             <button type="submit" class="btn btn-primary"><?= Label::_('LOGIN') ?></button>
         </div>
+        <input type="hidden" name="formToken" value="<?= $formToken ?>" />
     </form>
 </div>
 <div class="modal-backdrop fade in"></div>

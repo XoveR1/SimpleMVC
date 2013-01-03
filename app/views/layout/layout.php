@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8" />
@@ -14,7 +14,7 @@
         <?php endforeach; ?>
     </head>
     <body>
-        <div class="navbar navbar-fixed-top">
+        <div class="navbar navbar-static-top navbar-inverse">
             <div class="navbar-inner">
                 <div class="container">
                     <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -24,7 +24,7 @@
                     </a>
                     <a class="brand" href="<?= BASE_URI ?>"><?= Label::_(Factory::getConfig()->siteNameLabelKey) ?></a>
                     <div class="nav-collapse">
-                        <?php if(Factory::getCurrentUser()->isAdmin()) : ?>
+                        <?php if (Factory::getCurrentUser()->isAdmin()) : ?>
                             <?php $this->renderPartial('menu', array('layout' => true)) ?>
                             <ul class="nav pull-right">
                                 <li class="active">
@@ -72,7 +72,7 @@
                         <div class="span2">
                             <a class="logo" href="<?= BASE_URI ?>"></a>
                         </div>
-                        <div class="span10">
+                        <div class="span12">
                             <h1>
                                 <?= Label::_($this->getTitleLabelKey()) ?>
                             </h1>
@@ -81,6 +81,10 @@
                 <?php endif; ?>
             <?php endif; ?>
             <?= $content ?>
+            <hr/>
+            <footer>
+                <p class="muted pull-right"><?= Label::_('APP_VERSION') ?> <?= Factory::getConfig()->appVersion ?></p>
+            </footer>
         </div>
         <script type="text/javascript">
             var BASE_URI = '<?= BASE_URI ?>';                

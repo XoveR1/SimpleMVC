@@ -19,11 +19,19 @@ if(!defined('INSIDE_ACCESS')){
  */
 class Json {
     
+    /**
+     * Show json page from object without stop of script
+     * @param string $response
+     */
     public static function response($response){
         header('Content-Type: application/json');
         echo json_encode($response);
     }
     
+    /**
+     * Show json string without stop of script
+     * @param string $json
+     */
     public static function show($json){
         header('Content-Type: application/json');
         echo $json;

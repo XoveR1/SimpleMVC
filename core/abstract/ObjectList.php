@@ -17,9 +17,9 @@ require_once ROOT_PATH . DS . 'core' . DS . 'interfaces' . DS . 'IList.php';
 require_once ROOT_PATH . DS . 'core' . DS . 'Exceptions.php';
 
 /**
- * Exception for no item by key situation
+ * AppException for no item by key situation
  */
-class NoItemException extends Exception {
+class NoItemException extends AppException {
     
 }
 

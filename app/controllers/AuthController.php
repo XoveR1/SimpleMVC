@@ -24,10 +24,12 @@ require_once APP_PATH . DS . 'forms' . DS . 'LoginForm.php';
 class AuthController extends Controller {
 
     public function actionLogin() {
+        $form = new LoginForm();
         $viewValues = array(
             'dataErrors' => array(),
             'fieldsErrors' => array(),
-            'loginData' => array()
+            'loginData' => array(),
+            'formToken' => $form->generateToken()
         );
         if(Session::isExistInTemp('loginDataErrors')){
             $viewValues['dataErrors'] = 
@@ -50,6 +52,7 @@ class AuthController extends Controller {
     public function actionSign() {
         $post = $_POST['loginData'];
         $form = new LoginForm();
+        $form->setExternalToken($_POST['formToken']);
         $form->load($post);
         if(!$form->isValid()){
             Session::inTempStorage('loginDataErrors', 
@@ -59,22 +62,23 @@ class AuthController extends Controller {
             Session::inTempStorage('loginData', 
                     $form->getData());
         } else {
-            if(!User::enter($form->getLogin(), $form->getPassword())){
+            if(!User::enter($form->getLogin(), 
+                    $form->getPassword(), $form->getRemember())){
                 Session::inTempStorage('loginDataErrors', 
                         array(Controller::createMessage('USER_NOT_EXIST')));
             } else {
-                if($post['returnUrl']){
-                    $this->redirect($post['returnUrl']);
-                } else {
-                    $this->redirect('');
+                if(Session::isExist('redirect_url')){
+                    $redirectUrl = Session::removeValue('redirect_url');
+                    $this->redirect($redirectUrl);
                 }
+                $this->redirect('');
             }
         }
         $this->redirect('auth/login');
     }
     
     public function actionExit(){
-        Session::removeValue(User::USER_AUTH_FIELD);
+        User::closeSeance();
         $this->redirect('auth/login');
     }
 

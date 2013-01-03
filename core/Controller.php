@@ -92,7 +92,7 @@ class Controller {
      */
     protected function redirect($url = null) {
         if (is_null($url)) {
-            $url = Core::getCurrentUrl();
+            $url = Router::getCurrentUrl();
         }
         $url = BASE_URI . $url;
         Session::inTempStorage('isRedirect', true);

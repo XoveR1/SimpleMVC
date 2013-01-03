@@ -1,4 +1,4 @@
-<ul class="nav navbar">
+<ul class="nav">
     <?php foreach ($this->getMenuList() as $menuItem) : ?>
         <li id="menu_<?= $menuItem['menuKey'] ?>" class="<?= $menuItem['selected'] ? 'active' : '' ?> 
             <?= isset($menuItem['items']) ? 'dropdown' : '' ?>">

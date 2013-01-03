@@ -4,6 +4,16 @@ if(!defined('INSIDE_ACCESS')){
     die('No access to script!');
 }
 
+/**
+ * Contains class Singleton
+ * 
+ * @version	$Id: Singleton.php Feb 28, 2012 4:26:59 PM Z slava.poddubsky $
+ * @package	SimpleMVC
+ * @subpackage	Core
+ * @copyright	Copyright (C) 2012, Inc. All rights reserved.
+ * @license	see LICENSE.txt
+ */
+
 abstract class Singleton {
 
     /**

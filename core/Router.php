@@ -1,6 +1,6 @@
 <?php
 
-if(!defined('INSIDE_ACCESS')){
+if (!defined('INSIDE_ACCESS')) {
     die('No access to script!');
 }
 
@@ -18,9 +18,9 @@ if(!defined('INSIDE_ACCESS')){
  * Class for load controller actions by input url
  */
 class Router {
-    
+
     private static $currentUrl;
-    
+
     /**
      * Return short url without domain
      * @return type 
@@ -28,7 +28,7 @@ class Router {
     public static function getCurrentUrl() {
         return self::$currentUrl;
     }
-    
+
     /**
      * Return full url with domain
      * @return string
@@ -36,12 +36,12 @@ class Router {
     public static function getFullCurrentUrl() {
         return BASE_URI . self::$currentUrl;
     }
-    
+
     /**
      * Path to roures configuration file
      * @param string $routesPath 
      */
-    function __construct() {        
+    function __construct() {
         // Load currect url
         self::$currentUrl = $this->getURI();
         self::$currentUrl = $this->prepareURI(self::$currentUrl);
@@ -70,15 +70,13 @@ class Router {
      * @param string $internalRoute
      */
     protected function runController($segments) {
-        // Explode on segments.
-        //$segments = explode('/', $internalRoute);
         // First segment - controller.
         $controllerName = ucfirst(array_shift($segments));
         $controllerClass = $controllerName . 'Controller';
         // Second - action.
         $actionSuffix = ucfirst(array_shift($segments));
         // If no action - use default Index action
-        if($actionSuffix == ''){
+        if ($actionSuffix == '') {
             $actionSuffix = 'Index';
         }
         $action = 'action' . $actionSuffix;
@@ -90,6 +88,9 @@ class Router {
         if (file_exists($controllerFile)) {
             include($controllerFile);
             $controller = new $controllerClass($controllerName);
+        } else {
+            self::show404page();
+            return;
         }
 
         // If controller class or method not exist show 404 page
@@ -101,43 +102,45 @@ class Router {
         // Call contriller action with params
         call_user_func_array(array($controller, $action), $parameters);
     }
-    
+
     /**
      * Cleans URI
      * @param string $uri 
      * @return string clean URI
      */
-    protected function prepareURI($uri){
-        if(CFactory::getConfig()->useRewriteUrl){
-        // Cleans index.php?...
+    protected function prepareURI($uri) {
+        if (CFactory::getConfig()->useRewriteUrl) {
+            // Cleans index.php?...
             $index = strpos($uri, 'index.php');
-            if($index !== false){
+            if ($index !== false) {
                 $uri = str_replace(substr($uri, $index), '', $uri);
             }
             $getParams = strpos($uri, '?');
-            if($getParams !== false){
+            if ($getParams !== false) {
                 $uri = str_replace(substr($uri, $getParams), '', $uri);
             }
         }
         // Remove subdir part
-        if(SUB_URI != ''){
+        if (SUB_URI != '') {
             $uri = str_replace(SUB_URI . '/', '', $uri);
             $uri = str_replace(SUB_URI, '', $uri);
         }
         return $uri;
     }
-    
+
     /**
      * Show default 404 page
      */
-    public static function show404page(){
+    public static function show404page() {
         header("HTTP/1.0 404 Not Found");
         require_once ROOT_PATH . DS . 'core' . DS . 'View.php';
+        $currentUrl = Router::getFullCurrentUrl();
+        CFactory::getLogger()->warn("404. Not found page: {$currentUrl}");
         $view = new View();
         $view->setControllerName('system');
         $view->render('404page');
     }
-    
+
     /**
      * Convert controller short and action names in url  
      * @param string $controller
@@ -145,18 +148,18 @@ class Router {
      * @param string $params
      * @return string 
      */
-    public static function toUrl($controller, $action, $params = array()){
+    public static function toUrl($controller, $action, $params = array()) {
         $url = '';
-        if(CFactory::getConfig()->useRewriteUrl){
-            $url = BASE_URI . $controller . '/' . 
+        if (CFactory::getConfig()->useRewriteUrl) {
+            $url = BASE_URI . $controller . '/' .
                     $action;
-            if(count($params) > 0){
+            if (count($params) > 0) {
                 $url .= '/' . implode('/', $params);
             }
         } else {
             $url = BASE_URI . 'index.php?c=' . $controller . '&a=' . $action;
-            if(count($params) > 0){
-                foreach($params as $key => $param){
+            if (count($params) > 0) {
+                foreach ($params as $key => $param) {
                     $url .= "&$key=$param";
                 }
             }
@@ -172,18 +175,18 @@ class Router {
         $config = CFactory::getConfig();
         $action = array();
         // If url is empty or main page
-        if(self::$currentUrl == '' || 
-                self::$currentUrl == 'index.php'){
+        if (self::$currentUrl == '' ||
+                self::$currentUrl == 'index.php') {
             $action = $config->defaultAction;
-        } elseif($config->useRewriteUrl) {
+        } elseif ($config->useRewriteUrl) {
             // If rewrite urls using
             $action = explode('/', self::$currentUrl);
         } else {
             // If usually urls
-            foreach($_GET as $key => $param){
-                if($key == 'c'){
+            foreach ($_GET as $key => $param) {
+                if ($key == 'c') {
                     $action[0] = $param;
-                } elseif($key == 'a'){
+                } elseif ($key == 'a') {
                     $action[1] = $param;
                 } else {
                     $action[] = $param;

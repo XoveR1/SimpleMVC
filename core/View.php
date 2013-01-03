@@ -1,6 +1,6 @@
 <?php
 
-if(!defined('INSIDE_ACCESS')){
+if (!defined('INSIDE_ACCESS')) {
     die('No access to script!');
 }
 
@@ -138,10 +138,10 @@ class View {
     public static function getScriptsList() {
         $config = Factory::getConfig();
         $scripts = array();
-        $scriptsList = array_merge($config->scripts, self::$includeScript);
+        $scriptsList = array_merge(array($config->jQueryFile), 
+                $config->scripts, self::$includeScript);
         foreach ($scriptsList as $scriptName) {
-            $scriptPath = BASE_URI . 'app/views/layout/js/' . $scriptName . '.js';
-            $scripts[] = $scriptPath;
+            $scripts[] = self::viewFileToPath($scriptName . '.js');
         }
         return $scripts;
     }
@@ -151,30 +151,13 @@ class View {
      * @return array 
      */
     public static function getStylesList() {
-        $config = Core::instance()->getConfig();
+        $config = CFactory::getConfig();
         $styles = array();
         $stylesList = array_merge($config->styles, self::$includeStyles);
         foreach ($stylesList as $styleName) {
-            $stylePath = BASE_URI . 'app/views/layout/css/' . $styleName . '.css';
-            $styles[] = $stylePath;
+            $styles[] = self::viewFileToPath($styleName . '.css');
         }
         return $styles;
-    }
-
-    protected function renderMenuItem($item) {
-        if ($item['menuKey'] == $this->selectedMenu) {
-            $item['selected'] = true;
-        } else {
-            $item['selected'] = false;
-        }
-        if(isset($item['url'])){
-            $item['url'] = BASE_URI . $item['url'];
-        }
-        if(isset($item['fullUrl'])){
-            $item['url'] = $item['fullUrl'];
-            unset($item['fullUrl']);
-        }
-        return $item;
     }
 
     /**
@@ -182,7 +165,7 @@ class View {
      * @return array
      */
     public function getMenuList() {
-        $config = Core::instance()->getConfig();
+        $config = CFactory::getConfig();
         $menuItems = array();
         // Render all items
         foreach ($config->menu as $menuItem) {
@@ -191,15 +174,86 @@ class View {
                 $subItems = array();
                 // Render subitems
                 foreach ($menuItem['items'] as $subItem) {
-                    $subItems[$subItem['menuKey']] = 
-                        $this->renderMenuItem($subItem);
+                    $subItems[$subItem['menuKey']] =
+                            $this->renderMenuItem($subItem);
                 }
                 $menuItem['items'] = $subItems;
             }
-            $menuItems[$menuItem['menuKey']] = 
-                $this->renderMenuItem($menuItem);
+            $menuItems[$menuItem['menuKey']] =
+                    $this->renderMenuItem($menuItem);
         }
         return $menuItems;
+    }
+
+    /**
+     * Show exception to user in standart output
+     * @param Exception $ex
+     */
+    public static function showExeption(Exception $ex) {
+        $view = new View();
+        $view->setControllerName('system');
+        $view->render('exception', array('ex' => $ex));
+    }
+    
+    /**
+     * Convert file name that using in views in full path.
+     * For type detect using extension of file.
+     * If file is not contains extension 'js' or'css' throw exception.
+     * If file is not exist throw exception.
+     * @param  string       $fileName       Name of file with extension. 
+     *                                      If parametr equal null return jQuery path.
+     * @return string       Full path to view file.
+     * @throws AppException
+     */
+    public static function viewFileToPath($fileName = null){
+        $filePath = '';
+        $fileUrl = '';
+        // If file name equal null using jQuery file name
+        if(is_null($fileName)){
+            $fileName = CFactory::getConfig()->jQueryFile . '.js';
+        }
+        $pathInfo = pathinfo($fileName);
+        // If file have 'js' extension 
+        if($pathInfo['extension'] == 'js'){
+            $fileUrl = BASE_URI . 'app/views/layout/js/' . $fileName;
+            $filePath = APP_PATH . DS . 'views' . DS . 'layout' . DS . 'js' . DS . $fileName;
+        // If file have 'css' extension 
+        } elseif($pathInfo['extension'] == 'css') {
+            $fileUrl = BASE_URI . 'app/views/layout/css/' . $fileName;
+            $filePath = APP_PATH . DS . 'views' . DS . 'layout' . DS . 'css' . DS . $fileName;
+        // Otherwise throw exception
+        } else {
+            throw new AppException('Undefined type of included file.');
+        }
+        // Checks existing of file
+        if(!file_exists($filePath)){
+            throw new AppException("File '$filePath' not exist!");
+        }
+        return $fileUrl;
+    }
+
+    /**
+     * Renders menu item
+     * @param array $item
+     * @return array
+     */
+    protected function renderMenuItem($item) {
+        // If current item of menu - select it
+        if ($item['menuKey'] == $this->selectedMenu) {
+            $item['selected'] = true;
+        } else {
+            $item['selected'] = false;
+        }
+        // If usually internal system url
+        if (isset($item['url'])) {
+            $item['url'] = BASE_URI . $item['url'];
+        }
+        // If external full url
+        if (isset($item['fullUrl'])) {
+            $item['url'] = $item['fullUrl'];
+            unset($item['fullUrl']);
+        }
+        return $item;
     }
 
 }

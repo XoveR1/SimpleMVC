@@ -15,21 +15,20 @@ if(!defined('INSIDE_ACCESS')){
  */
 
 /**
- * Class for work with session
+ * Class for work with independ session
  */
 class Session {
 
     protected static $storageName = "storage";
+    protected static $appSessionName = 'appSession';
+    protected static $sessionId = '';
 
     /**
      * Start session
      */
     public static function startSessions() {
-        $lifeTime = CFactory::getConfig()->lifeSessionTime * 60;
-        //ini_set('session.save_path', $_SERVER['DOCUMENT_ROOT'] .'/../tmp/');
-        //ini_set('session.gc_maxlifetime', $lifeTime);
-        //ini_set('session.cookie_lifetime', $lifeTime);
         session_start();
+        self::$sessionId = session_id();
     }
 
     /**
@@ -39,9 +38,7 @@ class Session {
      * @param mixed $value 
      */
     public static function inTempStorage($key, $value) {
-        $_SESSION[self::$storageName][$key] = $value;
-        $session = $_SESSION[self::$storageName];
-        $session = 0;
+        $_SESSION[self::$appSessionName][self::$storageName][$key] = $value;
     }
 
     /**
@@ -50,7 +47,7 @@ class Session {
      * @return mixed
      */
     public static function fromTempStorage($key) {
-        $data = $_SESSION[self::$storageName][$key];
+        $data = $_SESSION[self::$appSessionName][self::$storageName][$key];
         return $data;
     }
 
@@ -59,14 +56,14 @@ class Session {
      * @param string $key 
      */
     public static function cleanTempByKey($key) {
-        unset($_SESSION[self::$storageName][$key]);
+        unset($_SESSION[self::$appSessionName][self::$storageName][$key]);
     }
 
     /**
      * Clean all data from temp storage
      */
     public static function cleanTempStorage() {
-        unset($_SESSION[self::$storageName]);
+        unset($_SESSION[self::$appSessionName][self::$storageName]);
     }
 
     /**
@@ -75,7 +72,7 @@ class Session {
      * @return bool 
      */
     public static function isExistInTemp($key) {
-        return isset($_SESSION[self::$storageName][$key]);
+        return isset($_SESSION[self::$appSessionName][self::$storageName][$key]);
     }
 
     /**
@@ -84,7 +81,7 @@ class Session {
      * @param mixed $value 
      */
     public static function setValue($key, $value) {
-        $_SESSION[$key] = $value;
+        $_SESSION[self::$appSessionName][$key] = $value;
     }
 
     /**
@@ -93,7 +90,7 @@ class Session {
      * @return mixed 
      */
     public static function getValue($key) {
-        return $_SESSION[$key];
+        return $_SESSION[self::$appSessionName][$key];
     }
 
     /**
@@ -102,15 +99,34 @@ class Session {
      * @return bool 
      */
     public static function isExist($key) {
-        return isset($_SESSION[$key]);
+        return isset($_SESSION[self::$appSessionName][$key]);
     }
 
     /**
      * Remove value by key
      * @param string $key 
+     * @return string Old value from session
      */
     public static function removeValue($key) {
-        unset($_SESSION[$key]);
+        $value = $_SESSION[self::$appSessionName][$key];
+        unset($_SESSION[self::$appSessionName][$key]);
+        return $value;
+    }
+    
+    /**
+     * Return current session id
+     * @return string String with current session id
+     */
+    public static function getSessionId(){
+        return self::$sessionId;
+    }
+    
+    /**
+     * Destroy all sessionj data
+     * @return bool TRUE on success or FALSE on failure.
+     */
+    public static function destroy(){
+        unset($_SESSION[self::$appSessionName]);
     }
 
 }
