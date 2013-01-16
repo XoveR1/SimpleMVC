@@ -36,7 +36,7 @@ require_once ROOT_PATH . DS . 'core' . DS . 'Config.php';
  * @property string     $debugMode              If debug mode in false 'errorReportingLevel' will be ignored and equal 0 
  *                                              and all Factory::debug() calls will show exceptions
  * @property string     $errorReportingLevel    PHP error reporting level:
- *                                              E_NOTICE => throw exception for notices, warnings and errors 
+ *                                              E_NOTICE => throw exception for notices, warnings and errors
  *                                              E_WARNING => throw exception for warnings and errors 
  *                                              E_ERROR => throw exception for errors 
  *                                              0 => turn off all errors
